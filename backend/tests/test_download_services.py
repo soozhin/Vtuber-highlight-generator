@@ -1,13 +1,13 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from backend.services.youtube_download import VideoDownloadService, AudioDownloadService
-from backend.core.constants import DOWNLOADED_VIDEO_PATH, DOWNLOADED_AUDIO_PATH
+from backend.core.constants import AUDIO_FORMAT, DOWNLOADED_VIDEO_PATH, DOWNLOADED_AUDIO_PATH, VIDEO_FORMAT
 
 @pytest.mark.parametrize(
     "service_class,expected_format,expected_path",
     [
-        (VideoDownloadService, 'bestvideo+bestaudio/best/mp4', f"{DOWNLOADED_VIDEO_PATH}/%(title)s.%(ext)s"),
-        (AudioDownloadService, 'bestaudio/mp3', f"{DOWNLOADED_AUDIO_PATH}/%(title)s.%(ext)s"),
+        (VideoDownloadService, VIDEO_FORMAT, f"{DOWNLOADED_VIDEO_PATH}/%(title)s.%(ext)s"),
+        (AudioDownloadService, AUDIO_FORMAT, f"{DOWNLOADED_AUDIO_PATH}/%(title)s.%(ext)s"),
     ]
 )
 @patch("backend.services.youtube_download.YoutubeDL")

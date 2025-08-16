@@ -1,5 +1,5 @@
 from yt_dlp import YoutubeDL
-from backend.core.constants import DOWNLOADED_VIDEO_PATH, DOWNLOADED_AUDIO_PATH
+from backend.core.constants import AUDIO_FORMAT, DOWNLOADED_VIDEO_PATH, DOWNLOADED_AUDIO_PATH, VIDEO_FORMAT
 
 class VideoDownloadService:
     def download(self, video_url: str) -> str:
@@ -11,7 +11,7 @@ class VideoDownloadService:
         """
         output_path = f"{DOWNLOADED_VIDEO_PATH}/%(title)s.%(ext)s"
         ydl_opts = {
-            'format': 'bestvideo+bestaudio/best/mp4',
+            'format': VIDEO_FORMAT,
             'outtmpl': output_path,
         }
 
@@ -30,7 +30,7 @@ class AudioDownloadService:
         """
         output_path = f"{DOWNLOADED_AUDIO_PATH}/%(title)s.%(ext)s"
         ydl_opts = {
-            'format': 'bestaudio/mp3',
+            'format': AUDIO_FORMAT,
             'outtmpl': output_path,
         }
 
