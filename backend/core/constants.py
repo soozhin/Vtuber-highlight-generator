@@ -1,3 +1,6 @@
+# Transcript chunk size in seconds
+TRANSCRIPT_CHUNK_SIZE = 60
+
 # These paths are used to store downloaded videos and audios.
 DOWNLOADED_VIDEO_DIR = "./backend/download/downloaded_videos"
 DOWNLOADED_AUDIO_DIR = "./backend/download/downloaded_audios"

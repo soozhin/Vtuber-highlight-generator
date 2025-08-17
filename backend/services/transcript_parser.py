@@ -1,9 +1,21 @@
+from datetime import datetime, timedelta
+
 import re
+
+from backend.core.constants import TRANSCRIPT_CHUNK_SIZE
 
 
 class TranscriptParser:
+    def parse(self, vtt_text: str):
+        """
+        Parses the WebVTT text and returns a list of transcript entries.
+        Each entry is a dictionary with 'start', 'end', and 'text' keys.
+        """
+        transcripts = self.parse_webvtt(vtt_text)
+        return self.aggregate_transcripts(transcripts)
+
     def parse_webvtt(self, vtt_text: str):
-        entries = []
+        transcripts = []
         pattern = re.compile(
             r"(\d+:\d+:\d+\.\d+)\s+-->\s+(\d+:\d+:\d+\.\d+)[^\n]*\n([^\n]*?)\n(?=(?!\s)|\Z)")
 
@@ -14,23 +26,49 @@ class TranscriptParser:
             clean_text = text.strip()
 
             if clean_text:
-                entries.append({
+                transcripts.append({
                     "start": start,
                     "end": end,
                     "text": clean_text
                 })
 
-        return entries
+        return transcripts
+
+    def aggregate_transcripts(self, transcripts):
+        aggregated = []
+        aggregated_text = ""
+        previous_start_time = None
+        for transcript in transcripts:
+            start = transcript['start']
+            end = transcript['end']
+            text = transcript['text']
+            current_start_time = datetime.strptime(start, "%H:%M:%S.%f")
+            current_end_time = datetime.strptime(end, "%H:%M:%S.%f")
+            aggregated_text = aggregated_text + " " + text
+
+            if previous_start_time is None:
+                previous_start_time = current_start_time
+
+            if current_end_time - previous_start_time > timedelta(seconds=TRANSCRIPT_CHUNK_SIZE) or transcript == transcripts[-1]:
+                aggregated.append({
+                    "start": datetime.strftime(previous_start_time, "%H:%M:%S.%f")[:-3],
+                    "end": end,
+                    "text": str.strip(aggregated_text)
+                })
+                aggregated_text = ""
+                previous_start_time = None
+
+        return aggregated
 
 
 # Example usage
 if __name__ == "__main__":
-    vtt_path = "./backend/download/downloaded_transcripts/AZKi： ＂So Many Masochists! What'll Happen To This World？!＂ (Hololive) [Eng Subs].ja.vtt"
+    vtt_path = "./backend/download/downloaded_transcripts/【郡道美玲⧸因幡はねる】サイコパスVtuber最強決定戦【夏色まつり⧸神楽めあ⧸犬山たまき】.ja.vtt"
     with open(vtt_path, 'r', encoding='utf-8') as file:
         vtt_content = file.read()
 
     parser = TranscriptParser()
-    parsed_entries = parser.parse_webvtt(vtt_content)
+    parsed_entries = parser.parse(vtt_content)
 
     for entry in parsed_entries:
         print(
