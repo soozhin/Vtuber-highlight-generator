@@ -1,7 +1,8 @@
 from backend.services.transcript_parser import TranscriptParser
 from textwrap import dedent
 
-def test_transcript_parser_service():
+
+def test_parse_webvtt():
     # Sample VTT content
     vtt_content = """
     WEBVTT
@@ -54,3 +55,34 @@ def test_transcript_parser_service():
 
     # Assert that the parsed entries match the expected entries
     assert parsed_entries == expected_entries
+
+
+def test_aggregate_transcripts():
+    # Sample parsed entries
+    parsed_entries = [
+        {"start": "00:00:04.880", "end": "00:00:59.950",
+            "text": "いやあ、まあ昨日はね、大変な1日だった"},
+        {"start": "00:00:59.960", "end": "00:01:12.749",
+            "text": "。もうそれ以外のことが何も考えられな"},
+        {"start": "00:01:12.759", "end": "00:02:16.230",
+            "text": "すぎて1日なんかぼーっとして過ごしてた"},
+        {"start": "00:02:16.230", "end": "00:02:19.230", "text": "AAA"}
+    ]
+
+    # Expected aggregated entries
+    expected_aggregated = [
+        {"start": "00:00:04.880", "end": "00:01:12.749",
+            "text": "いやあ、まあ昨日はね、大変な1日だった 。もうそれ以外のことが何も考えられな"},
+        {"start": "00:01:12.759", "end": "00:02:16.230",
+            "text": "すぎて1日なんかぼーっとして過ごしてた"},
+        {"start": "00:02:16.230", "end": "00:02:19.230", "text": "AAA"}
+    ]
+
+    # Create an instance of the TranscriptParserService
+    parser_service = TranscriptParser()
+
+    # Aggregate the transcripts
+    aggregated_entries = parser_service.aggregate_transcripts(parsed_entries)
+
+    # Assert that the aggregated entries match the expected entries
+    assert aggregated_entries == expected_aggregated
