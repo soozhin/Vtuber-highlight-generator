@@ -1,3 +1,4 @@
+from backend.core.constants import END, START, TEXT
 from backend.services.transcript_parser import TranscriptParser
 from textwrap import dedent
 
@@ -39,12 +40,12 @@ def test_parse_webvtt():
 
     # Expected parsed entries
     expected_entries = [
-        {"start": "00:00:04.880", "end": "00:00:07.950",
-            "text": "いやあ、まあ昨日はね、大変な1日だった"},
-        {"start": "00:00:07.960", "end": "00:00:12.749",
-            "text": "。もうそれ以外のことが何も考えられな"},
-        {"start": "00:00:12.759", "end": "00:00:16.230",
-            "text": "すぎて1日なんかぼーっとして過ごしてた"}
+        {START: "00:00:04.880", END: "00:00:07.950",
+            TEXT: "いやあ、まあ昨日はね、大変な1日だった"},
+        {START: "00:00:07.960", END: "00:00:12.749",
+            TEXT: "。もうそれ以外のことが何も考えられな"},
+        {START: "00:00:12.759", END: "00:00:16.230",
+            TEXT: "すぎて1日なんかぼーっとして過ごしてた"}
     ]
 
     # Create an instance of the TranscriptParserService
@@ -60,22 +61,22 @@ def test_parse_webvtt():
 def test_aggregate_transcripts():
     # Sample parsed entries
     parsed_entries = [
-        {"start": "00:00:04.880", "end": "00:00:59.950",
-            "text": "いやあ、まあ昨日はね、大変な1日だった"},
-        {"start": "00:00:59.960", "end": "00:01:12.749",
-            "text": "。もうそれ以外のことが何も考えられな"},
-        {"start": "00:01:12.759", "end": "00:02:16.230",
-            "text": "すぎて1日なんかぼーっとして過ごしてた"},
-        {"start": "00:02:16.230", "end": "00:02:19.230", "text": "AAA"}
+        {START: "00:00:04.880", END: "00:00:59.950",
+            TEXT: "いやあ、まあ昨日はね、大変な1日だった"},
+        {START: "00:00:59.960", END: "00:01:12.749",
+            TEXT: "。もうそれ以外のことが何も考えられな"},
+        {START: "00:01:12.759", END: "00:02:16.230",
+            TEXT: "すぎて1日なんかぼーっとして過ごしてた"},
+        {START: "00:02:16.230", END: "00:02:19.230", TEXT: "AAA"}
     ]
 
     # Expected aggregated entries
     expected_aggregated = [
-        {"start": "00:00:04.880", "end": "00:01:12.749",
-            "text": "いやあ、まあ昨日はね、大変な1日だった 。もうそれ以外のことが何も考えられな"},
-        {"start": "00:01:12.759", "end": "00:02:16.230",
-            "text": "すぎて1日なんかぼーっとして過ごしてた"},
-        {"start": "00:02:16.230", "end": "00:02:19.230", "text": "AAA"}
+        {START: "00:00:04.880", END: "00:01:12.749",
+            TEXT: "いやあ、まあ昨日はね、大変な1日だった 。もうそれ以外のことが何も考えられな"},
+        {START: "00:01:12.759", END: "00:02:16.230",
+            TEXT: "すぎて1日なんかぼーっとして過ごしてた"},
+        {START: "00:02:16.230", END: "00:02:19.230", TEXT: "AAA"}
     ]
 
     # Create an instance of the TranscriptParserService

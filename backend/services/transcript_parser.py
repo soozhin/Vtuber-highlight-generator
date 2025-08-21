@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import re
 
-from backend.core.constants import TRANSCRIPT_CHUNK_SIZE
+from backend.core.constants import END, START, TEXT, TRANSCRIPT_CHUNK_SIZE
 
 
 class TranscriptParser:
@@ -27,9 +27,9 @@ class TranscriptParser:
 
             if clean_text:
                 transcripts.append({
-                    "start": start,
-                    "end": end,
-                    "text": clean_text
+                    START: start,
+                    END: end,
+                    TEXT: clean_text
                 })
 
         return transcripts
@@ -39,9 +39,9 @@ class TranscriptParser:
         aggregated_text = ""
         previous_start_time = None
         for transcript in transcripts:
-            start = transcript['start']
-            end = transcript['end']
-            text = transcript['text']
+            start = transcript[START]
+            end = transcript[END]
+            text = transcript[TEXT]
             current_start_time = datetime.strptime(start, "%H:%M:%S.%f")
             current_end_time = datetime.strptime(end, "%H:%M:%S.%f")
             aggregated_text = aggregated_text + " " + text
@@ -51,9 +51,9 @@ class TranscriptParser:
 
             if current_end_time - previous_start_time > timedelta(seconds=TRANSCRIPT_CHUNK_SIZE) or transcript == transcripts[-1]:
                 aggregated.append({
-                    "start": datetime.strftime(previous_start_time, "%H:%M:%S.%f")[:-3],
-                    "end": end,
-                    "text": str.strip(aggregated_text)
+                    START: datetime.strftime(previous_start_time, "%H:%M:%S.%f")[:-3],
+                    END: end,
+                    TEXT: str.strip(aggregated_text)
                 })
                 aggregated_text = ""
                 previous_start_time = None
@@ -72,4 +72,4 @@ if __name__ == "__main__":
 
     for entry in parsed_entries:
         print(
-            f"Start: {entry['start']}, End: {entry['end']}, Text: {entry['text']}")
+            f"Start: {entry[START]}, End: {entry[END]}, Text: {entry[TEXT]}")

@@ -1,5 +1,5 @@
 import random
-from backend.core.constants import END, HIGHLIGHT_DETECTION_PROMPT, HIGHLIGHT_SCORE, MAX_SCORE, MIN_SCORE, REASON, START, TEXT, THRESHOLD_SCORE
+from backend.core.constants import END, HIGHLIGHT_DETECTION_PROMPT, HIGHLIGHT_SCORE, REASON, START, TEXT, THRESHOLD_SCORE
 from backend.core.settings import GOOGLE_AI_API_KEY
 from backend.models.ai_response import AIResponse
 
