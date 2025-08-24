@@ -12,6 +12,7 @@ END = "end"
 TEXT = "text"
 HIGHLIGHT_SCORE = "highlight_score"
 REASON = "reason"
+DURATION = "duration"
 
 # These paths are used to store downloaded videos and audios.
 DOWNLOADED_VIDEO_DIR = "./backend/download/downloaded_videos"
