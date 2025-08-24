@@ -24,7 +24,8 @@ DOWNLOADED_TRANSCRIPT_PATH = f"{DOWNLOADED_TRANSCRIPT_DIR}/%(title)s.%(ext)s"
 # Constants for video and audio formats
 VIDEO_FORMAT = 'bestvideo+bestaudio/best/mp4'
 AUDIO_FORMAT = 'mp3/bestaudio'
-LANGUAGE = 'ja'  # Default language for transcription
+LANGUAGE = ['ja', 'en']  # Default language for transcription
+TRANSCRIPT_EXT = "json"
 
 VIDEO_OPTION = {
     'format': VIDEO_FORMAT,
@@ -34,15 +35,6 @@ VIDEO_OPTION = {
 AUDIO_OPTION = {
     'format': AUDIO_FORMAT,
     'outtmpl': DOWNLOADED_AUDIO_PATH,
-}
-
-TRANSCRIPT_OPTION = {
-    'writesubtitles': True,
-    'subtitleslangs': ['ja'],  # Japanese subtitles
-    'outtmpl': DOWNLOADED_TRANSCRIPT_PATH,
-    'skip_download': True,  # Skip downloading the video
-    'writeautomaticsub': True,  # Download automatic subtitles if available
-    'subtitlesformat': 'vtt',  # Use VTT format for subtitles
 }
 
 

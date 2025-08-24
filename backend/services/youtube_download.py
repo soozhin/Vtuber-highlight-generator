@@ -1,7 +1,10 @@
 from yt_dlp import YoutubeDL
-from backend.core.constants import AUDIO_OPTION, LANGUAGE, TRANSCRIPT_OPTION, VIDEO_OPTION
+from backend.core.constants import AUDIO_OPTION, DOWNLOADED_TRANSCRIPT_PATH, LANGUAGE, TRANSCRIPT_EXT, VIDEO_OPTION
+from youtube_transcript_api import YouTubeTranscriptApi
 
 import os
+import json
+import re
 from pathlib import Path
 
 
@@ -21,7 +24,9 @@ class BaseDownloadService:
         if not os.path.exists(output_path):
             raise FileNotFoundError(f"File '{output_path}' does not exist.")
 
-        return output_path
+    def _sanitize_filename(self, name: str) -> str:
+        # Remove or replace invalid characters
+        return re.sub(r'[\\/*?:"<>|]', "_", name)
 
 
 class VideoDownloadService(BaseDownloadService):
@@ -54,19 +59,27 @@ class TranscriptDownloadService(BaseDownloadService):
         :param video_url: The URL of the video to download the transcript from.
         :return: The file path where the transcript is saved.
         """
-        return self._download(video_url, TRANSCRIPT_OPTION, lambda info,
-                              ydl: self._transcript_path_extractor(info, ydl))
+        video_id = video_url.rsplit('v=', 1)[-1]
 
-    def _transcript_path_extractor(self, info, ydl):
-        base_filename = Path(ydl.prepare_filename(
-            info)).with_suffix("")  # remove .mp4
-        subtitles = info.get("requested_subtitles")
+        # Create an instance
+        ytt_api = YouTubeTranscriptApi()
 
-        if not subtitles or LANGUAGE not in subtitles:
-            raise ValueError(f"No subtitles found for language '{LANGUAGE}'")
+        # Fetch transcript, languages in priority order
+        transcript = ytt_api.fetch(
+            video_id, languages=LANGUAGE, preserve_formatting=False)
 
-        ext = subtitles[LANGUAGE].get("ext", "vtt")
-        return str(base_filename.with_suffix(f".{LANGUAGE}.{ext}"))
+        with YoutubeDL({}) as ydl:
+            info = ydl.extract_info(video_url, download=False)
+            title = info["title"]
+            title = self._sanitize_filename(title)
+
+        output_path = DOWNLOADED_TRANSCRIPT_PATH % {
+            "title": title, "ext": TRANSCRIPT_EXT}
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(transcript.to_raw_data(), f,
+                      ensure_ascii=False, indent=2)
+
+        return output_path
 
 
 # Example usage
