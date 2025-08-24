@@ -9,20 +9,34 @@ from pathlib import Path
 
 
 class BaseDownloadService:
-    def _download(self, video_url: str, ydl_opts: dict, path_extractor) -> Path:
+    def _download(self, video_url: str, ydl_opts: dict) -> Path:
         """
         Base method to download content from a URL.
 
         :param video_url: The URL of the content to download.
         :return: The file path where the content is saved.
         """
-
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=True)
-            output_path = path_extractor(info, ydl)
+            output_path = info["requested_downloads"][0]["filename"]
 
-        if not os.path.exists(output_path):
+        # Extract real title + ext
+        raw_title = info.get("title")
+        ext = info.get("ext")
+
+        # Sanitize filename
+        safe_title = self._sanitize_filename(raw_title)
+        safe_path = os.path.join(os.path.dirname(
+            output_path), f"{safe_title}.{ext}")
+
+        # If yt-dlp saved to a different name, rename it
+        if output_path != safe_path:
+            os.rename(output_path, safe_path)
+
+        if not os.path.exists(safe_path):
             raise FileNotFoundError(f"File '{output_path}' does not exist.")
+
+        return safe_path
 
     def _sanitize_filename(self, name: str) -> str:
         # Remove or replace invalid characters
@@ -37,7 +51,8 @@ class VideoDownloadService(BaseDownloadService):
         :param video_url: The URL of the video to download.
         :return: The file path where the video is saved.
         """
-        return self._download(video_url, VIDEO_OPTION, lambda info, ydl: info["requested_downloads"][0]["filename"])
+
+        return self._download(video_url, VIDEO_OPTION)
 
 
 class AudioDownloadService(BaseDownloadService):
@@ -48,7 +63,7 @@ class AudioDownloadService(BaseDownloadService):
         :param video_url: The URL of the video to extract audio from.
         :return: The file path where the audio is saved.
         """
-        return self._download(video_url, AUDIO_OPTION, lambda info, ydl: info["requested_downloads"][0]["filename"])
+        return self._download(video_url, AUDIO_OPTION)
 
 
 class TranscriptDownloadService(BaseDownloadService):
@@ -90,11 +105,11 @@ if __name__ == "__main__":
 
     video_url = "https://www.youtube.com/watch?v=-MRIkiCRVW8"
 
-    # video_path = video_service.download(video_url)
-    # print(f"Video downloaded to: {video_path}")
+    video_path = video_service.download(video_url)
+    print(f"Video downloaded to: {video_path}")
 
-    # audio_path = audio_service.download(video_url)
-    # print(f"Audio downloaded to: {audio_path}")
+    audio_path = audio_service.download(video_url)
+    print(f"Audio downloaded to: {audio_path}")
 
     transcript_path = transcript_service.download(video_url)
     print(f"Transcript downloaded to: {transcript_path}")
