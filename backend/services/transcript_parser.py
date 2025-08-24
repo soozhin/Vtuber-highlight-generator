@@ -1,26 +1,40 @@
 from datetime import datetime, timedelta
+from typing import List
 
-import re
+import json
 
-from backend.core.constants import END, START, TEXT, TRANSCRIPT_CHUNK_SIZE
+from backend.core.constants import DURATION, END, START, TEXT, TRANSCRIPT_CHUNK_SIZE
 
 
 class TranscriptParser:
-    def parse(self, vtt_text: str):
+    def parse(self, transctipts_path: str):
         """
         Parses the WebVTT text and returns a list of transcript entries.
         Each entry is a dictionary with 'start', 'end', and 'text' keys.
         """
-        transcripts = self.parse_webvtt(vtt_text)
-        return self.aggregate_transcripts(transcripts)
+        transcripts = self._extract_json(transctipts_path)
+        transcripts = self._parse_transcripts(transcripts)
+        return self._aggregate_transcripts(transcripts)
 
-    def parse_webvtt(self, vtt_text: str):
+    def _extract_json(self, transctipts_path: str) -> List:
+        with open(transctipts_path, 'r') as file:
+            transctipts = json.load(file)
+        return transctipts
+
+    def _parse_transcripts(self, transcripts_raw: str):
         transcripts = []
-        pattern = re.compile(
-            r"(\d+:\d+:\d+\.\d+)\s+-->\s+(\d+:\d+:\d+\.\d+)[^\n]*\n([^\n]*?)\n(?=(?!\s)|\Z)")
 
-        for match in pattern.finditer(vtt_text):
-            start, end, text = match.groups()
+        for i, chunk in enumerate(transcripts_raw):
+            text = chunk[TEXT]
+            start_sec = chunk[START]
+
+            if i < len(transcripts_raw) - 1:
+                end_sec = transcripts_raw[i+1][START]
+            else:
+                end_sec = chunk[DURATION] + start_sec
+
+            start = self._format_seconds(start_sec)
+            end = self._format_seconds(end_sec)
 
             # Clean text
             clean_text = text.strip()
@@ -34,7 +48,15 @@ class TranscriptParser:
 
         return transcripts
 
-    def aggregate_transcripts(self, transcripts):
+    def _format_seconds(self, seconds: float) -> str:
+        td = timedelta(seconds=seconds)
+        total_seconds = td.total_seconds()
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+        secs = total_seconds % 60
+        return f"{hours:02}:{minutes:02}:{secs:06.3f}"  # HH:MM:SS.mmm
+
+    def _aggregate_transcripts(self, transcripts):
         aggregated = []
         aggregated_text = ""
         previous_start_time = None
@@ -63,12 +85,10 @@ class TranscriptParser:
 
 # Example usage
 if __name__ == "__main__":
-    vtt_path = "./backend/download/downloaded_transcripts/【郡道美玲⧸因幡はねる】サイコパスVtuber最強決定戦【夏色まつり⧸神楽めあ⧸犬山たまき】.ja.vtt"
-    with open(vtt_path, 'r', encoding='utf-8') as file:
-        vtt_content = file.read()
+    vtt_path = "./backend/download/downloaded_transcripts/【恋バナ】超絶ノンデリ彼ピと！念願の恋愛相談読んでみる・・・よッ！【にじさんじ_星川サラ_犬山たまき】#星川恋愛研究所.json"
 
     parser = TranscriptParser()
-    parsed_entries = parser.parse(vtt_content)
+    parsed_entries = parser.parse(vtt_path)
 
     for entry in parsed_entries:
         print(
