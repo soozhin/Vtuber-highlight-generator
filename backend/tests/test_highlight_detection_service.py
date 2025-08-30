@@ -41,7 +41,8 @@ def test_score_transcripts(client_mock):
     assert scored_transcripts[1][REASON] == "mock reason"
 
 
-def test_detect_highlights():
+@patch("backend.services.highlight_detection.genai.Client")
+def test_detect_highlights(_):
     service = HighlightDetectionService()
 
     transcripts = [
@@ -83,7 +84,8 @@ def test_detect_highlights():
     assert highlights[1][REASON] == "Very interesting"
 
 
-def test_aggregate_highlights():
+@patch("backend.services.highlight_detection.genai.Client")
+def test_aggregate_highlights(_):
     service = HighlightDetectionService()
 
     highlights = [
