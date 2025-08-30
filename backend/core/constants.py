@@ -6,6 +6,11 @@ MAX_SCORE = 10
 MIN_SCORE = 0
 THRESHOLD_SCORE = 7
 
+# AI request
+AI_REQUEST_PER_MINUTE_LIMIT = 15
+AI_REQUEST_BUFFER_SECONDS = 10
+SLEEP_TIME_BEFORE_RETRY_SECONDS = 1
+
 # Highlight
 START = "start"
 END = "end"
@@ -38,7 +43,9 @@ AUDIO_OPTION = {
     'outtmpl': DOWNLOADED_AUDIO_PATH,
 }
 
-
+# AI
+AI_RESPONSE_PRECEDING_STRING_FORMAT = r"^```(?:json)?\s*"
+AI_RESPONSE_SUCCEDING_STRING_FORMAT = r"\s*```$"
 HIGHLIGHT_DETECTION_PROMPT = f"""
 You are a livestream highlight detector.
 
