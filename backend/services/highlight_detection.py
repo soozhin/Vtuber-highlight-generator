@@ -1,12 +1,14 @@
 import random
-from backend.core.constants import END, HIGHLIGHT_DETECTION_PROMPT, HIGHLIGHT_SCORE, REASON, START, TEXT, THRESHOLD_SCORE
-from backend.core.settings import GOOGLE_AI_API_KEY
+from backend.core.constants import AI_REQUEST_BUFFER_SECONDS, AI_REQUEST_PER_MINUTE_LIMIT, AI_RESPONSE_PRECEDING_STRING_FORMAT, AI_RESPONSE_SUCCEDING_STRING_FORMAT, END, HIGHLIGHT_DETECTION_PROMPT, HIGHLIGHT_SCORE, MAX_SCORE, MIN_SCORE, REASON, SLEEP_TIME_BEFORE_RETRY_SECONDS, START, TEXT, THRESHOLD_SCORE
+from backend.core.settings import GOOGLE_AI_API_KEY, GOOGLE_AI_MODEL
 from backend.models.ai_response import AIResponse
 
 from google import genai
 
 import json
 import re
+import time
+import datetime
 
 
 class HighlightDetectionService:
@@ -81,14 +83,22 @@ class HighlightDetectionService:
         Detect highlights in the video.
         """
         transcsript_score = []
+        start_time = datetime.datetime.now()
+        should_renew_start_time = False
 
-        for transcript in transcripts:
-            # AI promps for highlight detection
+        for index, transcript in enumerate(transcripts):
+            # Adjust request per minute
+            while self._over_ai_rpm(start_time, index):
+                time.sleep(SLEEP_TIME_BEFORE_RETRY_SECONDS)
+                should_renew_start_time = True
+            if should_renew_start_time:
+                start_time = datetime.datetime.now()
+                should_renew_start_time = False
 
+            # AI prompt for highlight detection
             prompt = HIGHLIGHT_DETECTION_PROMPT % transcript[TEXT]
-
             response = self.client.models.generate_content(
-                model="gemini-2.5-flash-lite",
+                model=GOOGLE_AI_MODEL,
                 contents=prompt,
             )
             resp_text = response.text
@@ -103,8 +113,10 @@ class HighlightDetectionService:
             #     str(dummy_response).replace("'", '"') + "\n```"
 
             try:
-                cleaned = re.sub(r"^```(?:json)?\s*", "", resp_text.strip())
-                cleaned = re.sub(r"\s*```$", "", cleaned)
+                cleaned = re.sub(
+                    AI_RESPONSE_PRECEDING_STRING_FORMAT, "", resp_text.strip())
+                cleaned = re.sub(
+                    AI_RESPONSE_SUCCEDING_STRING_FORMAT, "", cleaned)
                 resp_json = json.loads(cleaned)
                 ai_resp = AIResponse(
                     highlight_score=float(resp_json.get(HIGHLIGHT_SCORE, 0)),
@@ -124,6 +136,14 @@ class HighlightDetectionService:
             transcsript_score.append(transcript)
 
         return transcsript_score
+
+    def _over_ai_rpm(self, start_time: datetime.datetime, index: int) -> bool:
+        current_time = datetime.datetime.now()
+        if index == 0:
+            return False
+        if index % AI_REQUEST_PER_MINUTE_LIMIT == 0 and (current_time - start_time) < datetime.timedelta(minutes=1, seconds=AI_REQUEST_BUFFER_SECONDS):
+            return True
+        return False
 
 
 # Example usage

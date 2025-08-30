@@ -1,3 +1,4 @@
 import os
 
 GOOGLE_AI_API_KEY = os.getenv('GOOGLE_AI_API_KEY')
+GOOGLE_AI_MODEL = os.getenv('GOOGLE_AI_MODEL')
