@@ -65,5 +65,6 @@ Return a JSON object with:
 
 
 # Google cloud storage
+MAX_UPLOAD_WORKERS = 5
 URL_EXPIRATION_SECONDS = 3600
 SIGNED_CREDENTIAL_VERSION = "v4"
