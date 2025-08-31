@@ -3,6 +3,7 @@ from backend.core.settings import GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_BUCKET_
 
 from google.cloud import storage
 from google.oauth2 import service_account
+from concurrent.futures import ThreadPoolExecutor
 
 import os
 
@@ -26,12 +27,15 @@ class GoogleCloudStorage:
         """
         signed_urls = []
 
-        for video_path in video_paths:
-            destination_filename = os.path.basename(video_path)
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = []
+            for video_path in video_paths:
+                destination_filename = os.path.basename(video_path)
+                futures.append(executor.submit(
+                    self.upload_one_file, video_path, destination_filename))
 
-            url = self.upload_one_file(video_path, destination_filename)
-
-            signed_urls.append(url)
+            for future in futures:
+                signed_urls.append(future.result())
 
         return signed_urls
 
@@ -46,8 +50,6 @@ class GoogleCloudStorage:
 
         # Upload file
         blob.upload_from_filename(video_path)
-        print(
-            f"File {video_path} uploaded to gs://{GOOGLE_BUCKET_NAME}/{destination_blob}")
 
         url = blob.generate_signed_url(
             version=SIGNED_CREDENTIAL_VERSION, expiration=URL_EXPIRATION_SECONDS)  # 1 hour
@@ -83,7 +85,13 @@ if __name__ == "__main__":
                    r"backend/download/downloaded_videos/【Minecraft】視聴者１００人サーバーを観光してみる！！！！！　#結城さくな生放送_clipped_00:32:07.880_00:33:12.200.mp4",
                    r"backend/download/downloaded_videos/【Minecraft】視聴者１００人サーバーを観光してみる！！！！！　#結城さくな生放送_clipped_00:40:24.040_00:41:27.880.mp4"]
     google_cloud_storage = GoogleCloudStorage()
+
+    import datetime
+    start_time = datetime.datetime.now()
     signed_urls = google_cloud_storage.upload(video_paths)
+    end_time = datetime.datetime.now()
+    print(
+        f"Upload time: {(end_time-start_time).seconds}s")
 
     for url in signed_urls:
         print(url)
