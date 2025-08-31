@@ -62,3 +62,8 @@ Return a JSON object with:
 - highlight_score ({MIN_SCORE}-{MAX_SCORE}, {MIN_SCORE} = not highlight, {MAX_SCORE} = very strong)
 - reason (short explanation)
 """
+
+
+# Google cloud storage
+URL_EXPIRATION_SECONDS = 3600
+SIGNED_CREDENTIAL_VERSION = "v4"
