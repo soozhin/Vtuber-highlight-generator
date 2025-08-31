@@ -212,3 +212,6 @@ __marimo__/
 # Local files
 download/
 .DS_Store
+
+# Google cloud
+gen-lang-client*.json
