@@ -41,7 +41,6 @@ class GenerateHighlightCoordinator:
 
             # Clip the video based on detected highlights
             video_path = video_future.result()
-            # video_path = r"/Users/limsoozhin/Documents/Program/Vtuber-highlight-generator/backend/download/downloaded_videos/【Minecraft】視聴者１００人サーバーを観光してみる！！！！！　#結城さくな生放送.mp4"
             video_clipping_service = VideoClippingService(video_path)
             clipped_videos = video_clipping_service.clip(highlights)
             print(f"Clipped Videos: {clipped_videos}")
