@@ -1,4 +1,4 @@
-from backend.core.constants import SIGNED_CREDENTIAL_VERSION, URL_EXPIRATION_SECONDS
+from backend.core.constants import MAX_UPLOAD_WORKERS, SIGNED_CREDENTIAL_VERSION, URL_EXPIRATION_SECONDS
 from backend.core.settings import GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_BUCKET_NAME
 
 from google.cloud import storage
@@ -27,7 +27,7 @@ class GoogleCloudStorage:
         """
         signed_urls = []
 
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=MAX_UPLOAD_WORKERS) as executor:
             futures = []
             for video_path in video_paths:
                 destination_filename = os.path.basename(video_path)
