@@ -135,6 +135,8 @@ class HighlightDetectionService:
 
             transcsript_score.append(transcript)
 
+            print(f"Scoring progress: {index+1}/{len(transcripts)}", end="\r")
+
         return transcsript_score
 
     def _over_ai_rpm(self, start_time: datetime.datetime, index: int) -> bool:
