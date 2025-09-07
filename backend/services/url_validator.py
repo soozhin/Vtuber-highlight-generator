@@ -16,6 +16,7 @@ if __name__ == "__main__":
     url1 = "random_str1"
     url2 = "https://www.youtube.com/watch?v=UcE0Go6I0XI"
 
-    print(f"Url1 validity: {UrlValidator.is_validate_url(url1)}")   # Url1 validity: False
-    print(f"Url2 validity: {UrlValidator.is_validate_url(url2)}")   # Url2 validity: True
-    
+    # Url1 validity: False
+    print(f"Url1 validity: {UrlValidator.is_validate_url(url1)}")
+    # Url2 validity: True
+    print(f"Url2 validity: {UrlValidator.is_validate_url(url2)}")
