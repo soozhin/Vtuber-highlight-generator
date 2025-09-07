@@ -15,7 +15,7 @@ class GenerateHighlightCoordinator:
     such as video, audio, and transcript download services.
     """
 
-    def run(self, video_url: str) -> List:
+    def run(self, video_url: str) -> GenerateHighlightResponse:
         """
         This method coordinates all the services in the backend.
         """
@@ -51,10 +51,7 @@ class GenerateHighlightCoordinator:
             urls = gcs_service.upload(clipped_videos)
             print(f"Download links count: {len(urls)}")
 
-        if urls:
-            download_links = GenerateHighlightResponse.model_validate(urls)
-        else:
-            download_links = []
+        download_links = GenerateHighlightResponse(download_links=urls)
 
         return download_links
 
