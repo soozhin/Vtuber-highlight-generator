@@ -1,3 +1,5 @@
+import re
+
 # Transcript chunk size in seconds
 TRANSCRIPT_CHUNK_SIZE = 60
 
@@ -42,6 +44,11 @@ AUDIO_OPTION = {
     'format': AUDIO_FORMAT,
     'outtmpl': DOWNLOADED_AUDIO_PATH,
 }
+
+# Youtube
+YOUTUBE_REGEX = re.compile(
+    r"^(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/)[\w-]{11}(&.*)?$"
+)
 
 # AI
 AI_RESPONSE_PRECEDING_STRING_FORMAT = r"^```(?:json)?\s*"
